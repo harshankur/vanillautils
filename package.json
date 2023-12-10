@@ -1,0 +1,33 @@
+{
+    "name": "vanillautils",
+    "version": "1.0.0",
+    "description": "A zero-dependency collection of utility functions that can be imported as a module or be added to any website using a minified js file which simplifies developing websites.",
+    "main": "vanillaUtils.js",
+    "files": [
+      "vanillaUtils.js",
+      "typings/vanillaUtils.d.ts"
+    ],
+    "types": "typings/vanillaUtils.d.ts",
+    "scripts": {
+        "test": "node test/testVanillaUtils.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/harshankur/vanillautils.git"
+    },
+    "keywords": [
+        "utils",
+        "cookies",
+        "api",
+        "vanilla"
+    ],
+    "author": "Harsh Ankur",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/harshankur/vanillautils/issues"
+    },
+    "homepage": "https://github.com/harshankur/vanillautils#readme",
+    "devDependencies": {
+        "typescript": "^5.0.3"
+    }
+}
