@@ -9,6 +9,66 @@
 // #endregion
 
 // #region API Request Manager
+
+
+/** @typedef {Object} FetchConfig
+ * @property {'DELETE'
+ *            | 'GET'
+ *            | 'POST'
+ *            | 'PUT'}                             method         Method of the fetch call. Could be 'GET', 'POST', 'PUT' or 'DELETE'. Default is 'GET'.
+ * @property {'no-cors'
+ *            | 'cors'
+ *            | 'same-origin'}                     mode           Cross-Origin Mode. Could be 'no-cors', 'cors' or 'same-origin'. Default is 'cors'.
+ * @property {'default'
+ *            | 'no-cache'
+ *            | 'reload'
+ *            | 'force-cache'
+ *            | 'only-if-cached'}                  cache          Cache Policy. Could be 'default', 'no-cache', 'reload', 'force-cache' or 'only-if-cached'. Default is 'default'.
+ * @property {'include'
+ *            | 'same-origin'
+ *            | 'omit'}                            credentials    Credentials Policy. Could be 'include', 'same-origin' or 'omit'. Default is 'same-origin'.
+ * @property {'manual'
+ *            | 'follow'
+ *            | 'error'}                           redirect       Redirect Policy. Could be 'manual', 'follow' or 'error'. Default is 'follow'.
+ * @property {'no-referrer'
+ *             | 'no-referrer-when-downgrade'
+ *             | 'origin'
+ *             | 'origin-when-cross-origin'
+ *             | 'same-origin'
+ *             | 'strict-origin'
+ *             | 'strict-origin-when-cross-origin'
+ *             | 'unsafe-url'}                     referrerPolicy Refferer Policy. Could be 'no-referrer', 'no-referrer-when-downgrade', 'origin', 'origin-when-cross-origin', 'same-origin', 'strict-origin', 'strict-origin-when-cross-origin' or 'unsafe-url'. Default is 'no-referrer-when-downgrade'.
+ * @property {object}                              headers        Header for this fetch request. Default is an empty object.
+ * @property {object | string}                     body           Body for this fetch request. Body data type must match "Content-Type" header.
+ */
+
+/**
+ * Fetch handler for a request with body.
+ * @param   {string}      url         Url to make this fetch request.
+ * @param   {FetchConfig} [config={}] Config for this fetch request.
+ * 
+ * @returns {Promise<any>}            Returns a Promise for the fetch request.
+ */
+export function fetchRequest(url, config = {}) {
+    // Validation
+    if (url == undefined)
+        return Promise.reject("Improper request. Needs a url.");
+
+    // Local Config Object.
+    const internalConfig  = {...config};
+    internalConfig.method = internalConfig.method ?? 'GET';
+
+    // Execute fetch call and return promise.
+    return fetch(url, internalConfig)
+            .then((response) => {
+                if (!response.ok) {
+                    throw response;
+                }
+                return response.json();
+            });
+}
+
+
 // #endregion
 
 // #region Cookies
@@ -27,6 +87,7 @@
  * @param   {string}       key    Key of the cookie
  * @param   {string}       value  Value to be set for this cookie
  * @param   {CookieConfig} [config={}] [OPTIONAL] Configuration for settings cookies
+ * 
  * @returns {void}
  */
 export function setCookie(key, value, config = {}) {
@@ -57,7 +118,8 @@ export function setCookie(key, value, config = {}) {
 /**
  * Fetches cookie value for a given key.
  * @param   {string} key Key of the cookie
- * @returns {string} Value of the cookie for the corresponding
+ * 
+ * @returns {string}     Value of the cookie for the corresponding
  */
 export function getCookie(key) {
     // Get cookie text
@@ -73,6 +135,7 @@ export function getCookie(key) {
 /**
  * Remove cookie for a given key.
  * @param   {string} key Key of the cookie
+ * 
  * @returns {void}
  */
 export function removeCookie(key) {
@@ -86,7 +149,7 @@ export function removeCookie(key) {
 // #region Asynchronous Functions
 // #endregion
 
-
+module.exports.fetchRequest    = fetchRequest;
 module.exports.setCookie       = setCookie;
 module.exports.getCookieCookie = setCookie;
 module.exports.removeCookie    = setCookie;
