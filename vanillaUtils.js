@@ -6,6 +6,11 @@
 
 
 // #region DOM Manipulation
+
+
+
+
+
 // #endregion
 
 // #region API Request Manager
@@ -147,9 +152,26 @@ export function removeCookie(key) {
 // #endregion
 
 // #region Asynchronous Functions
+
+
+/**
+ * This takes a function and returns a promisied version of it.
+ * Basically it resolves after this fn is executed.
+ * It is helpful primarily when one is switching over multiple cases and some of them do not return a promise but it is easier to handle all the cases in promises.
+ * @param   {function}     fn   Function that is needed to be promisied.
+ * @param   {any[]}        args Array of arguments to be called for this function.
+ * 
+ * @returns {Promise<any>}      Promise that will be resolved once the fn function is executed.
+ */
+export function toPromise(fn, args) {
+    return new Promise((res, _) => { res(fn(...args)) });
+}
+
+
 // #endregion
 
 module.exports.fetchRequest    = fetchRequest;
 module.exports.setCookie       = setCookie;
 module.exports.getCookieCookie = setCookie;
 module.exports.removeCookie    = setCookie;
+module.exports.toPromise       = toPromise;

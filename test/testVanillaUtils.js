@@ -1,1 +1,1 @@
-import { getCookie, setCookie, CookieConfig, removeCookie, fetchRequest } from "../vanillaUtils";
+import { getCookie, setCookie, CookieConfig, removeCookie, fetchRequest, toPromise } from "../vanillaUtils";

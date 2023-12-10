@@ -70,6 +70,16 @@ export function getCookie(key: string): string;
  * @returns {void}
  */
 export function removeCookie(key: string): void;
+/**
+ * This takes a function and returns a promisied version of it.
+ * Basically it resolves after this fn is executed.
+ * It is helpful primarily when one is switching over multiple cases and some of them do not return a promise but it is easier to handle all the cases in promises.
+ * @param   {function}     fn   Function that is needed to be promisied.
+ * @param   {any[]}        args Array of arguments to be called for this function.
+ *
+ * @returns {Promise<any>}      Promise that will be resolved once the fn function is executed.
+ */
+export function toPromise(fn: Function, args: any[]): Promise<any>;
 export type FetchConfig = {
     /**
      * Method of the fetch call. Could be 'GET', 'POST', 'PUT' or 'DELETE'. Default is 'GET'.
