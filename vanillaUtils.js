@@ -8,7 +8,25 @@
 // #region DOM Manipulation
 
 
-
+/**
+ * Creates an element with a given attribute map in the argument for a given tagName.
+ * @param   {string}               tagName         A tag name for this new element to be created.
+ * @param   {{[key: string]: any}} [attributes={}] We will use this object's keys as attributes for the element and its values as the attribute values.
+ * 
+ * @returns {HTMLElement}
+ */
+export function createElement(tagName, attributes = {}) {
+    // Create element
+    const element = document.createElement(tagName);
+    // Add all the attributes.
+    for (let key in attributes)
+    {
+        if (!attributes.hasOwnProperty(key))
+            continue;
+        element.setAttribute(key, attributes[key]);
+    }
+    return element;
+}
 
 
 // #endregion

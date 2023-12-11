@@ -3,6 +3,16 @@
  * A COLLECTION OF UTILITY FUNCTIONS THAT CAN BE USED IN DEVELOPMENT OF ANY FRONTEND PROJECTS. *
  *                                     AUTHOR: HARSH ANKUR                                     *
  ***********************************************************************************************/
+/**
+ * Creates an element with a given attribute map in the argument for a given tagName.
+ * @param   {string}               tagName         A tag name for this new element to be created.
+ * @param   {{[key: string]: any}} [attributes={}] We will use this object's keys as attributes for the element and its values as the attribute values.
+ *
+ * @returns {HTMLElement}
+ */
+export function createElement(tagName: string, attributes?: {
+    [key: string]: any;
+}): HTMLElement;
 /** @typedef {Object} FetchConfig
  * @property {'DELETE'
  *            | 'GET'
