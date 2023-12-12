@@ -14,6 +14,21 @@
  * @param   {{[key: string]: any}} [attributes={}] We will use this object's keys as attributes for the element and its values as the attribute values.
  * 
  * @returns {HTMLElement}
+ * 
+ * @example const element = createElement('div',
+ *                                          {
+ *                                              class: 'class1 class2',
+ *                                              id: 'id1',
+ *                                              style: '{ display: "flex"; }',
+ *                                              'data-region': 'Germany'
+ *                                          });
+ * // <div class="class1 class2" id="id1" style="{ display: "flex"; }" data-region="Germany"></div>
+ * @example const element = createElement('a',
+ *                                          {
+ *                                              href: 'https://blog.harshankur.com',
+ *                                              target: '_blank'
+ *                                          });
+ * // <a href="https://blog.harshankur.com" target="_blank"></a>
  */
 export function createElement(tagName, attributes = {}) {
     // Create element
@@ -71,6 +86,18 @@ export function createElement(tagName, attributes = {}) {
  * @param   {FetchConfig} [config={}] Config for this fetch request.
  * 
  * @returns {Promise<any>}            Returns a Promise for the fetch request.
+ * 
+ * @example fetchRequest('https://mirror.harshankur.com/vanillaUtils.min.js')
+ * // GET https://mirror.harshankur.com/vanillaUtils.min.js
+ * @example fetchRequest('https://post-example.com/registerName',
+ *                          {
+ *                              method: 'POST',
+ *                              header: {
+ *                                  'Content-Type': 'application/json'
+ *                              },
+ *                              body: JSON.stringify({ name: "Harsh Ankur" })
+ *                          })
+ * // POST https://post-example.com/registerName -H "Content-Type: application/json" -d '{ "name": "Harsh Ankur" }'
  */
 export function fetchRequest(url, config = {}) {
     // Validation
@@ -112,6 +139,11 @@ export function fetchRequest(url, config = {}) {
  * @param   {CookieConfig} [config={}] [OPTIONAL] Configuration for settings cookies
  * 
  * @returns {void}
+ * 
+ * @example setCookie("key1", "value1");
+ * // Setting session specific cookie for key1: value1
+ * @example setCookie("key2", "value2", { expires: 30, path: '/' });
+ * // Setting key2: value2 cookie on the root domain that expires in 30 days.
  */
 export function setCookie(key, value, config = {}) {
     // Cookie string text
@@ -140,9 +172,14 @@ export function setCookie(key, value, config = {}) {
 
 /**
  * Fetches cookie value for a given key.
- * @param   {string} key Key of the cookie
+ * @param   {string} key Key of the cookie.
  * 
- * @returns {string}     Value of the cookie for the corresponding
+ * @returns {string}     Value of the cookie for the corresponding key.
+ * 
+ * @example const storedValue = getCookie("key1");
+ * // "value1"
+ * @example const storedValue = getCookie("key2");
+ * // "value2"
  */
 export function getCookie(key) {
     // Get cookie text
@@ -160,6 +197,12 @@ export function getCookie(key) {
  * @param   {string} key Key of the cookie
  * 
  * @returns {void}
+ * 
+ * @example getCookie("key1");
+ * // "value1"
+ * removeCookie("key1");
+ * getCookie("key1");
+ * // ""
  */
 export function removeCookie(key) {
     // Set cookie expiry to the current time so it expires immediately after.
