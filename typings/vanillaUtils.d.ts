@@ -28,6 +28,30 @@
 export function createElement(tagName: string, attributes?: {
     [key: string]: any;
 }): HTMLElement;
+/**
+ * Opens the link provided in the argument 'url'. Based on the other argument 'newTab', it either opens it in the same tab or in a new tab.
+ * NOTE: In the case of trying to open this url in a new tab, the browser might first ask the user to enable popups for this website instead of directly opening the link.
+ * @param   {string}  url            The url that you want to open on the client's browser.
+ * @param   {boolean} [newTab=false] Flag whether to open this url in a new tab. Please note that passing this true might get the new link (popup) blocked depending on the browser settings.
+ *
+ * @returns {void}
+ *
+ * @example openLink("https://github.com/harshankur");
+ * @example openLink("https://github.com/harshankur", true);
+ */
+export function openLink(url: string, newTab?: boolean): void;
+/**
+ * Downloads the content of the url passed in the argument.
+ * NOTE: You can only trigger download of a url which is in the same domain as the current one.
+ * There is Cross-Site access for downloads.
+ * If you pass a url from another domain, the browser usually just opens the file on the same tab which might result in loss of unsaved data in the current page.
+ * @param   {string} url The url from which you wish to trigger a content download.
+ *
+ * @returns {void}
+ *
+ * @example downloadLink("https://mirror.harshankur.com/vanillaUtils.min.js");
+ */
+export function downloadLink(url: string): void;
 /** @typedef {Object} FetchConfig
  * @property {'DELETE'
  *            | 'GET'
