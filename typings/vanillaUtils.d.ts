@@ -6,27 +6,29 @@
 /**
  * Creates an element with a given attribute map in the argument for a given tagName.
  * @param   {string}               tagName         A tag name for this new element to be created.
- * @param   {{[key: string]: any}} [attributes={}] We will use this object's keys as attributes for the element and its values as the attribute values.
+ * @param   {Object.<string, any>} [attributes={}] We will use this object's keys as attributes for the element and its values as the attribute values.
  *
  * @returns {HTMLElement}
  *
- * @example const element = createElement('div',
- *                                          {
- *                                              class: 'class1 class2',
- *                                              id: 'id1',
- *                                              style: '{ display: "flex"; }',
- *                                              'data-region': 'Germany'
- *                                          });
+ * @example
+ * const attributes = {
+ *     class: 'class1 class2',
+ *     id: 'id1',
+ *     style: '{ display: "flex"; }',
+ *     'data-region': 'Germany'
+ * };
+ * const element = createElement('div', attributes);
  * // <div class="class1 class2" id="id1" style="{ display: "flex"; }" data-region="Germany"></div>
- * @example const element = createElement('a',
- *                                          {
- *                                              href: 'https://blog.harshankur.com',
- *                                              target: '_blank'
- *                                          });
+ * @example
+ * const attributes = {
+ *     href: 'https://blog.harshankur.com',
+ *     target: '_blank'
+ * };
+ * const element = createElement('a', attributes);
  * // <a href="https://blog.harshankur.com" target="_blank"></a>
  */
 export function createElement(tagName: string, attributes?: {
-    [key: string]: any;
+    [x: string]: any;
 }): HTMLElement;
 /**
  * Opens the link provided in the argument 'url'. Based on the other argument 'newTab', it either opens it in the same tab or in a new tab.
@@ -56,21 +58,23 @@ export function downloadLink(url: string): void;
  * @property {'DELETE'
  *            | 'GET'
  *            | 'POST'
- *            | 'PUT'}                             method         Method of the fetch call. Could be 'GET', 'POST', 'PUT' or 'DELETE'. Default is 'GET'.
+ *            | 'PUT'}                             [method]         Method of the fetch call. Default is **'GET'**.
  * @property {'no-cors'
  *            | 'cors'
- *            | 'same-origin'}                     mode           Cross-Origin Mode. Could be 'no-cors', 'cors' or 'same-origin'. Default is 'cors'.
+ *            | 'navigate'
+ *            | 'websocket'
+ *            | 'same-origin'}                     [mode]           Cross-Origin Mode. Default is **'cors'** if the fetch is created using Request constructor. Otherwise it is **'no-cors'**.
  * @property {'default'
  *            | 'no-cache'
  *            | 'reload'
  *            | 'force-cache'
- *            | 'only-if-cached'}                  cache          Cache Policy. Could be 'default', 'no-cache', 'reload', 'force-cache' or 'only-if-cached'. Default is 'default'.
+ *            | 'only-if-cached'}                  [cache]          Cache Policy. Default is **'default'**.
  * @property {'include'
  *            | 'same-origin'
- *            | 'omit'}                            credentials    Credentials Policy. Could be 'include', 'same-origin' or 'omit'. Default is 'same-origin'.
+ *            | 'omit'}                            [credentials]    Credentials Policy. Default is **'same-origin'**.
  * @property {'manual'
  *            | 'follow'
- *            | 'error'}                           redirect       Redirect Policy. Could be 'manual', 'follow' or 'error'. Default is 'follow'.
+ *            | 'error'}                           [redirect]       Redirect Policy. Default is **'follow'**.
  * @property {'no-referrer'
  *             | 'no-referrer-when-downgrade'
  *             | 'origin'
@@ -78,9 +82,9 @@ export function downloadLink(url: string): void;
  *             | 'same-origin'
  *             | 'strict-origin'
  *             | 'strict-origin-when-cross-origin'
- *             | 'unsafe-url'}                     referrerPolicy Refferer Policy. Could be 'no-referrer', 'no-referrer-when-downgrade', 'origin', 'origin-when-cross-origin', 'same-origin', 'strict-origin', 'strict-origin-when-cross-origin' or 'unsafe-url'. Default is 'no-referrer-when-downgrade'.
- * @property {object}                              headers        Header for this fetch request. Default is an empty object.
- * @property {object | string}                     body           Body for this fetch request. Body data type must match "Content-Type" header.
+ *             | 'unsafe-url'}                     [referrerPolicy] Refferer Policy. Default is **'no-referrer-when-downgrade'**.
+ * @property {object}                              [headers]        Header for this fetch request. Default is an empty object.
+ * @property {object | string}                     [body]           Body for this fetch request. Body data type must match "Content-Type" header.
  */
 /**
  * Fetch handler for a request with body.
@@ -89,16 +93,18 @@ export function downloadLink(url: string): void;
  *
  * @returns {Promise<any>}            Returns a Promise for the fetch request.
  *
- * @example fetchRequest('https://mirror.harshankur.com/vanillaUtils.min.js')
+ * @example
+ * fetchRequest('https://mirror.harshankur.com/vanillaUtils.min.js')
  * // GET https://mirror.harshankur.com/vanillaUtils.min.js
- * @example fetchRequest('https://post-example.com/registerName',
- *                          {
- *                              method: 'POST',
- *                              header: {
- *                                  'Content-Type': 'application/json'
- *                              },
- *                              body: JSON.stringify({ name: "Harsh Ankur" })
- *                          })
+ * @example
+ * const params = {
+ *     method: 'POST',
+ *     header: {
+ *         'Content-Type': 'application/json'
+ *     },
+ *     body: JSON.stringify({ name: "Harsh Ankur" })
+ * };
+ * fetchRequest('https://post-example.com/registerName', params);
  * // POST https://post-example.com/registerName -H "Content-Type: application/json" -d '{ "name": "Harsh Ankur" }'
  */
 export function fetchRequest(url: string, config?: FetchConfig): Promise<any>;
@@ -106,7 +112,7 @@ export function fetchRequest(url: string, config?: FetchConfig): Promise<any>;
  * @property {number}  [expires]  Number of DAYS after which this cookie will be expired. If not specified, it would mean that the cookie is session-specific.
  * @property {string}  [path]     Indicates the path that must exist in the requested URL for the browser to send the Cookie header (e.g., '/', '/mydir'). If not specified, it defaults to the current path of the current document location.
  * @property {string}  [samesite] Prevents the browser from sending this cookie along with cross-site requests. Possible values are lax, strict or none. Strict prevents from sending to cross-site requests. Lax allows a few basic cross-site requests but prevents many Cross-Site Requesst Forgery attacks. Default is None which implies no restriction.
- * @property {boolean} [secure]   Specifies that the cookie should only be transmitted over a secure protocol. Default is true which would mean that this cookie will be sent over only in secure communications.
+ * @property {boolean} [secure]   Specifies that the cookie should only be transmitted over a secure protocol. Default is **true** which would mean that this cookie will be sent over only in secure communications.
  */
 /**
  * Sets cookie on the browser for the given key and value for the given duration
@@ -159,37 +165,37 @@ export function removeCookie(key: string): void;
 export function toPromise(fn: Function, args: any[]): Promise<any>;
 export type FetchConfig = {
     /**
-     * Method of the fetch call. Could be 'GET', 'POST', 'PUT' or 'DELETE'. Default is 'GET'.
+     * Method of the fetch call. Default is **'GET'**.
      */
-    method: 'DELETE' | 'GET' | 'POST' | 'PUT';
+    method?: 'DELETE' | 'GET' | 'POST' | 'PUT';
     /**
-     * Cross-Origin Mode. Could be 'no-cors', 'cors' or 'same-origin'. Default is 'cors'.
+     * Cross-Origin Mode. Default is **'cors'** if the fetch is created using Request constructor. Otherwise it is **'no-cors'**.
      */
-    mode: 'no-cors' | 'cors' | 'same-origin';
+    mode?: 'no-cors' | 'cors' | 'navigate' | 'websocket' | 'same-origin';
     /**
-     * Cache Policy. Could be 'default', 'no-cache', 'reload', 'force-cache' or 'only-if-cached'. Default is 'default'.
+     * Cache Policy. Default is **'default'**.
      */
-    cache: 'default' | 'no-cache' | 'reload' | 'force-cache' | 'only-if-cached';
+    cache?: 'default' | 'no-cache' | 'reload' | 'force-cache' | 'only-if-cached';
     /**
-     * Credentials Policy. Could be 'include', 'same-origin' or 'omit'. Default is 'same-origin'.
+     * Credentials Policy. Default is **'same-origin'**.
      */
-    credentials: 'include' | 'same-origin' | 'omit';
+    credentials?: 'include' | 'same-origin' | 'omit';
     /**
-     * Redirect Policy. Could be 'manual', 'follow' or 'error'. Default is 'follow'.
+     * Redirect Policy. Default is **'follow'**.
      */
-    redirect: 'manual' | 'follow' | 'error';
+    redirect?: 'manual' | 'follow' | 'error';
     /**
-     * Refferer Policy. Could be 'no-referrer', 'no-referrer-when-downgrade', 'origin', 'origin-when-cross-origin', 'same-origin', 'strict-origin', 'strict-origin-when-cross-origin' or 'unsafe-url'. Default is 'no-referrer-when-downgrade'.
+     * Refferer Policy. Default is **'no-referrer-when-downgrade'**.
      */
-    referrerPolicy: 'no-referrer' | 'no-referrer-when-downgrade' | 'origin' | 'origin-when-cross-origin' | 'same-origin' | 'strict-origin' | 'strict-origin-when-cross-origin' | 'unsafe-url';
+    referrerPolicy?: 'no-referrer' | 'no-referrer-when-downgrade' | 'origin' | 'origin-when-cross-origin' | 'same-origin' | 'strict-origin' | 'strict-origin-when-cross-origin' | 'unsafe-url';
     /**
      * Header for this fetch request. Default is an empty object.
      */
-    headers: object;
+    headers?: object;
     /**
      * Body for this fetch request. Body data type must match "Content-Type" header.
      */
-    body: object | string;
+    body?: object | string;
 };
 export type CookieConfig = {
     /**
@@ -205,7 +211,7 @@ export type CookieConfig = {
      */
     samesite?: string;
     /**
-     * Specifies that the cookie should only be transmitted over a secure protocol. Default is true which would mean that this cookie will be sent over only in secure communications.
+     * Specifies that the cookie should only be transmitted over a secure protocol. Default is **true** which would mean that this cookie will be sent over only in secure communications.
      */
     secure?: boolean;
 };

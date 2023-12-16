@@ -4,8 +4,8 @@
     "description": "A zero-dependency collection of utility functions that can be imported as a module or be added to any website using a minified js file which simplifies developing websites.",
     "main": "vanillaUtils.js",
     "files": [
-      "vanillaUtils.js",
-      "typings/vanillaUtils.d.ts"
+        "vanillaUtils.js",
+        "typings/vanillaUtils.d.ts"
     ],
     "types": "typings/vanillaUtils.d.ts",
     "scripts": {
@@ -28,6 +28,8 @@
     },
     "homepage": "https://github.com/harshankur/vanillautils#readme",
     "devDependencies": {
+        "jsdoc-to-markdown": "^8.0.0",
+        "minify": "^11.0.1",
         "typescript": "^5.0.3"
     }
 }
