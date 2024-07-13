@@ -27,7 +27,7 @@
  * const element = createElement('a', attributes);
  * // <a href="https://blog.harshankur.com" target="_blank"></a>
  */
-export function createElement(tagName: string, attributes?: {
+declare function createElement(tagName: string, attributes?: {
     [x: string]: any;
 }): HTMLElement;
 /**
@@ -41,7 +41,7 @@ export function createElement(tagName: string, attributes?: {
  * @example openLink("https://github.com/harshankur");
  * @example openLink("https://github.com/harshankur", true);
  */
-export function openLink(url: string, newTab?: boolean): void;
+declare function openLink(url: string, newTab?: boolean): void;
 /**
  * Downloads the content of the url passed in the argument.
  * NOTE: You can only trigger download of a url which is in the same domain as the current one.
@@ -53,7 +53,25 @@ export function openLink(url: string, newTab?: boolean): void;
  *
  * @example downloadLink("https://mirror.harshankur.com/vanillaUtils.min.js");
  */
-export function downloadLink(url: string): void;
+declare function downloadLink(url: string): void;
+/**
+ * Guess the MIME type based on the initial bytes of a file.
+ * @param   {Uint8Array} bytes The byte array representing the file content.
+ *
+ * @returns {string}           The guessed MIME type or 'application/octet-stream' if unknown.
+ */
+declare function guessMimeType(bytes: Uint8Array): string;
+/**
+ * Saves the content of the byteArray passed in the argument with its filename passed in the argument.
+ * @param   {Uint8Array} bytes  File bytes.
+ * @param   {string}     name   The name of the file in the download
+ * @param   {string}     [type] File Mimetype
+ *
+ * @returns {void}
+ *
+ * @example downloadFileFromBytes(<bytes>, 'myFile.pdf');
+ */
+declare function downloadFileFromBytes(bytes: Uint8Array, name: string, type?: string): void;
 /** @typedef {Object} FetchConfig
  * @property {'DELETE'
  *            | 'GET'
@@ -107,7 +125,7 @@ export function downloadLink(url: string): void;
  * fetchRequest('https://post-example.com/registerName', params);
  * // POST https://post-example.com/registerName -H "Content-Type: application/json" -d '{ "name": "Harsh Ankur" }'
  */
-export function fetchRequest(url: string, config?: FetchConfig): Promise<any>;
+declare function fetchRequest(url: string, config?: FetchConfig): Promise<any>;
 /** @typedef {Object} CookieConfig
  * @property {number}  [expires]  Number of DAYS after which this cookie will be expired. If not specified, it would mean that the cookie is session-specific.
  * @property {string}  [path]     Indicates the path that must exist in the requested URL for the browser to send the Cookie header (e.g., '/', '/mydir'). If not specified, it defaults to the current path of the current document location.
@@ -127,7 +145,7 @@ export function fetchRequest(url: string, config?: FetchConfig): Promise<any>;
  * @example setCookie("key2", "value2", { expires: 30, path: '/' });
  * // Setting key2: value2 cookie on the root domain that expires in 30 days.
  */
-export function setCookie(key: string, value: string, config?: CookieConfig): void;
+declare function setCookie(key: string, value: string, config?: CookieConfig): void;
 /**
  * Fetches cookie value for a given key.
  * @param   {string} key Key of the cookie.
@@ -139,7 +157,7 @@ export function setCookie(key: string, value: string, config?: CookieConfig): vo
  * @example const storedValue = getCookie("key2");
  * // "value2"
  */
-export function getCookie(key: string): string;
+declare function getCookie(key: string): string;
 /**
  * Remove cookie for a given key.
  * @param   {string} key Key of the cookie
@@ -152,7 +170,7 @@ export function getCookie(key: string): string;
  * getCookie("key1");
  * // ""
  */
-export function removeCookie(key: string): void;
+declare function removeCookie(key: string): void;
 /**
  * This takes a function and returns a promisied version of it.
  * Basically it resolves after this fn is executed.
@@ -162,8 +180,8 @@ export function removeCookie(key: string): void;
  *
  * @returns {Promise<any>}      Promise that will be resolved once the fn function is executed.
  */
-export function toPromise(fn: Function, args: any[]): Promise<any>;
-export type FetchConfig = {
+declare function toPromise(fn: Function, args: any[]): Promise<any>;
+type FetchConfig = {
     /**
      * Method of the fetch call. Default is **'GET'**.
      */
@@ -197,7 +215,7 @@ export type FetchConfig = {
      */
     body?: object | string;
 };
-export type CookieConfig = {
+type CookieConfig = {
     /**
      * Number of DAYS after which this cookie will be expired. If not specified, it would mean that the cookie is session-specific.
      */

@@ -32,7 +32,7 @@
  * const element = createElement('a', attributes);
  * // <a href="https://blog.harshankur.com" target="_blank"></a>
  */
-export function createElement(tagName, attributes = {}) {
+function createElement(tagName, attributes = {}) {
     // Create element
     const element = document.createElement(tagName);
     // Add all the attributes.
@@ -56,7 +56,7 @@ export function createElement(tagName, attributes = {}) {
  * @example openLink("https://github.com/harshankur");
  * @example openLink("https://github.com/harshankur", true);
  */
-export function openLink(url, newTab = false) {
+function openLink(url, newTab = false) {
     const element = createElement('a', { href: url, target: newTab ? '_blank' : '_self' });
     element.click();
     element.remove();
@@ -73,11 +73,79 @@ export function openLink(url, newTab = false) {
  * 
  * @example downloadLink("https://mirror.harshankur.com/vanillaUtils.min.js");
  */
-export function downloadLink(url) {
+function downloadLink(url) {
     const element = createElement('a', { href: url, download: url.split('/').pop() });
     element.click();
     element.remove();
 }
+
+/**
+ * Guess the MIME type based on the initial bytes of a file.
+ * @param   {Uint8Array} bytes The byte array representing the file content.
+ * 
+ * @returns {string}           The guessed MIME type or 'application/octet-stream' if unknown.
+ */
+function guessMimeType(bytes) {
+    /**
+     * Known file signatures mapped to their corresponding MIME types.
+     * @type {Object.<string, string>}
+     */
+    const signatures = {
+        "89504E47": "image/png",
+        "47494638": "image/gif",
+        "FFD8FF": "image/jpeg",
+        "25504446": "application/pdf",
+        "504B0304": "application/zip",
+        "504B34": "application/vnd.openxmlformats-officedocument",
+        "49492A00": "image/tiff",
+        "4D4D002A": "image/tiff",
+        "377ABCAF271C": "application/7z",
+        "1F8B08": "application/gzip",
+        "424D": "image/bmp"
+    };
+
+    /**
+     * Converts a byte array to a hexadecimal string.
+     * @param   {Uint8Array} byteArray The byte array to convert.
+     * @returns {string}               The hexadecimal string representation of the byte array.
+     */
+    const getHexString = (byteArray) => {
+        return Array.from(byteArray)
+            .map(byte => byte.toString(16).padStart(2, '0').toUpperCase())
+            .join('');
+    };
+
+    // Get the hexadecimal string representation of the byte array.
+    const bytesHex = getHexString(bytes);
+
+    // Check each known signature to see if the file's bytes start with it.
+    for (const [signature, mimeType] of Object.entries(signatures)) {
+        if (bytesHex.startsWith(signature)) {
+            return mimeType;
+        }
+    }
+
+    // Return a default MIME type if no match is found.
+    return 'application/octet-stream';
+}
+
+
+/**
+ * Saves the content of the byteArray passed in the argument with its filename passed in the argument.
+ * @param   {Uint8Array} bytes  File bytes.
+ * @param   {string}     name   The name of the file in the download
+ * @param   {string}     [type] File Mimetype
+ * 
+ * @returns {void}
+ * 
+ * @example downloadFileFromBytes(<bytes>, 'myFile.pdf');
+ */
+function downloadFileFromBytes(bytes, name, type) {
+    const blob = new Blob([bytes], { type: type ?? guessMimeType(bytes) });
+    const element = createElement('a', { 'href': window.URL.createObjectURL(blob), 'download': name });
+    element.click();
+    element.remove();
+};
 
 
 // #endregion
@@ -139,7 +207,7 @@ export function downloadLink(url) {
  * fetchRequest('https://post-example.com/registerName', params);
  * // POST https://post-example.com/registerName -H "Content-Type: application/json" -d '{ "name": "Harsh Ankur" }'
  */
-export function fetchRequest(url, config = {}) {
+function fetchRequest(url, config = {}) {
     // Validation
     if (url == undefined)
         return Promise.reject("Improper request. Needs a url.");
@@ -185,7 +253,7 @@ export function fetchRequest(url, config = {}) {
  * @example setCookie("key2", "value2", { expires: 30, path: '/' });
  * // Setting key2: value2 cookie on the root domain that expires in 30 days.
  */
-export function setCookie(key, value, config = {}) {
+function setCookie(key, value, config = {}) {
     // Cookie string text
     let cookieText = `${key}=${value}`;
     // Set expiry days
@@ -221,7 +289,7 @@ export function setCookie(key, value, config = {}) {
  * @example const storedValue = getCookie("key2");
  * // "value2"
  */
-export function getCookie(key) {
+function getCookie(key) {
     // Get cookie text
     const cookies = decodeURIComponent(document.cookie).split(';').map(text => text.trim());
     const found = cookies.find(cookie => cookie.indexOf(key + '=') == 0);
@@ -244,7 +312,7 @@ export function getCookie(key) {
  * getCookie("key1");
  * // ""
  */
-export function removeCookie(key) {
+function removeCookie(key) {
     // Set cookie expiry to the current time so it expires immediately after.
     document.cookie = `${key}=;expires=${(new Date()).toGMTString()}`;
 }
@@ -264,7 +332,7 @@ export function removeCookie(key) {
  * 
  * @returns {Promise<any>}      Promise that will be resolved once the fn function is executed.
  */
-export function toPromise(fn, args) {
+function toPromise(fn, args) {
     return new Promise((res, _) => { res(fn(...args)) });
 }
 

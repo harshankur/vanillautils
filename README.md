@@ -27,6 +27,12 @@ NOTE: You can only trigger download of a url which is in the same domain as the 
 There is Cross-Site access for downloads.
 If you pass a url from another domain, the browser usually just opens the file on the same tab which might result in loss of unsaved data in the current page.</p>
 </dd>
+<dt><a href="#guessMimeType">guessMimeType(bytes)</a> ⇒ <code>string</code></dt>
+<dd><p>Guess the MIME type based on the initial bytes of a file.</p>
+</dd>
+<dt><a href="#downloadFileFromBytes">downloadFileFromBytes(bytes, name, [type])</a> ⇒ <code>void</code></dt>
+<dd><p>Saves the content of the byteArray passed in the argument with its filename passed in the argument.</p>
+</dd>
 <dt><a href="#fetchRequest">fetchRequest(url, [config])</a> ⇒ <code>Promise.&lt;any&gt;</code></dt>
 <dd><p>Fetch handler for a request with body.</p>
 </dd>
@@ -125,6 +131,58 @@ If you pass a url from another domain, the browser usually just opens the file o
 **Example**  
 ```js
 downloadLink("https://mirror.harshankur.com/vanillaUtils.min.js");
+```
+<a name="guessMimeType"></a>
+
+## guessMimeType(bytes) ⇒ <code>string</code>
+Guess the MIME type based on the initial bytes of a file.
+
+**Kind**: global function  
+**Returns**: <code>string</code> - The guessed MIME type or 'application/octet-stream' if unknown.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| bytes | <code>Uint8Array</code> | The byte array representing the file content. |
+
+
+* [guessMimeType(bytes)](#guessMimeType) ⇒ <code>string</code>
+    * [~signatures](#guessMimeType..signatures) : <code>Object.&lt;string, string&gt;</code>
+    * [~getHexString(byteArray)](#guessMimeType..getHexString) ⇒ <code>string</code>
+
+<a name="guessMimeType..signatures"></a>
+
+### guessMimeType~signatures : <code>Object.&lt;string, string&gt;</code>
+Known file signatures mapped to their corresponding MIME types.
+
+**Kind**: inner constant of [<code>guessMimeType</code>](#guessMimeType)  
+<a name="guessMimeType..getHexString"></a>
+
+### guessMimeType~getHexString(byteArray) ⇒ <code>string</code>
+Converts a byte array to a hexadecimal string.
+
+**Kind**: inner method of [<code>guessMimeType</code>](#guessMimeType)  
+**Returns**: <code>string</code> - The hexadecimal string representation of the byte array.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| byteArray | <code>Uint8Array</code> | The byte array to convert. |
+
+<a name="downloadFileFromBytes"></a>
+
+## downloadFileFromBytes(bytes, name, [type]) ⇒ <code>void</code>
+Saves the content of the byteArray passed in the argument with its filename passed in the argument.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| bytes | <code>Uint8Array</code> | File bytes. |
+| name | <code>string</code> | The name of the file in the download |
+| [type] | <code>string</code> | File Mimetype |
+
+**Example**  
+```js
+downloadFileFromBytes(<bytes>, 'myFile.pdf');
 ```
 <a name="fetchRequest"></a>
 
