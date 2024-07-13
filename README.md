@@ -50,6 +50,9 @@ If you pass a url from another domain, the browser usually just opens the file o
 Basically it resolves after this fn is executed.
 It is helpful primarily when one is switching over multiple cases and some of them do not return a promise but it is easier to handle all the cases in promises.</p>
 </dd>
+<dt><a href="#debounce">debounce(fn, t)</a> ⇒ <code>function</code></dt>
+<dd><p>Debounces a function, i.e., ignored repeated calls for a function. It rather takes the last call while it is waiting.</p>
+</dd>
 </dl>
 
 ## Typedefs
@@ -292,6 +295,18 @@ It is helpful primarily when one is switching over multiple cases and some of th
 | --- | --- | --- |
 | fn | <code>function</code> | Function that is needed to be promisied. |
 | args | <code>Array.&lt;any&gt;</code> | Array of arguments to be called for this function. |
+
+<a name="debounce"></a>
+
+## debounce(fn, t) ⇒ <code>function</code>
+Debounces a function, i.e., ignored repeated calls for a function. It rather takes the last call while it is waiting.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| fn | <code>function</code> | Function needed to debounce |
+| t | <code>number</code> | milliseconds delay for debouncing. |
 
 <a name="FetchConfig"></a>
 

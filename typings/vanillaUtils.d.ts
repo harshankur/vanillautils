@@ -181,6 +181,13 @@ declare function removeCookie(key: string): void;
  * @returns {Promise<any>}      Promise that will be resolved once the fn function is executed.
  */
 declare function toPromise(fn: Function, args: any[]): Promise<any>;
+/**
+ * Debounces a function, i.e., ignored repeated calls for a function. It rather takes the last call while it is waiting.
+ * @param {function}  fn Function needed to debounce
+ * @param {number}    t  milliseconds delay for debouncing.
+ * @return {function}
+ */
+declare function debounce(fn: Function, t: number): Function;
 type FetchConfig = {
     /**
      * Method of the fetch call. Default is **'GET'**.

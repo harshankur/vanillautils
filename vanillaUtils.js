@@ -336,5 +336,68 @@ function toPromise(fn, args) {
     return new Promise((res, _) => { res(fn(...args)) });
 }
 
+/**
+ * Debounces a function, i.e., ignored repeated calls for a function. It rather takes the last call while it is waiting.
+ * @param {function}  fn Function needed to debounce
+ * @param {number}    t  milliseconds delay for debouncing.
+ * @return {function}
+ */
+function debounce(fn, t) {
+    let scheduled = undefined;
+    return function(...args) {
+        if (scheduled)
+            clearTimeout(scheduled);
+        scheduled = setTimeout(() => fn(...args), t);
+    }
+};
+
+
+// #endregion
+
+
+
+// #region Array Custom Prototype Functions.
+
+/**
+ * Sum of array
+ */
+Array.prototype.sum = function() {
+    return this.reduce((acc, v) => acc + v, 0);
+}
+
+/**
+ * Maximum number in the array.
+ * Returns -Infinity for empty array
+ */
+Array.prototype.max = function() {
+    return Math.max(...this);
+}
+
+/**
+ * Minimum number in the array.
+ * Retuns Infinity for empty array.
+ */
+Array.prototype.min = function() {
+    return Math.min(...this);
+}
+
+/**
+ * Groups items of array based on the passed function.
+ * 
+ * @example - [1,2,3].groupBy(String) // {"1":[1],"2":[2],"3":[3]}
+ */
+Array.prototype.groupBy = function(fn) {
+    const res = {};
+    this.forEach(val => {
+        const key = fn(val);
+        const existingVal = res[key];
+        if (existingVal)
+            existingVal.push(val);
+        else
+            res[key] = [val];
+    });
+    return res;
+};
+
 
 // #endregion
