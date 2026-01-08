@@ -40,6 +40,41 @@ It is helpful primarily when one is switching over multiple cases and some of th
 <dt><a href="#debounce">debounce(fn, t)</a> ⇒ <code>function</code></dt>
 <dd><p>Debounces a function, i.e., ignored repeated calls for a function. It rather takes the last call while it is waiting.</p>
 </dd>
+<dt><a href="#capitalize">capitalize(str)</a> ⇒ <code>string</code></dt>
+<dd><p>Capitalizes the first letter of a string.</p>
+</dd>
+<dt><a href="#truncate">truncate(str, length)</a> ⇒ <code>string</code></dt>
+<dd><p>Truncates a string to a specified length and adds an ellipsis (...) if it exceeds that length.</p>
+</dd>
+<dt><a href="#slugify">slugify(str)</a> ⇒ <code>string</code></dt>
+<dd><p>Converts a string into a URL-friendly slug.
+Converts to lowercase, removes non-word characters, and replaces spaces with dashes.</p>
+</dd>
+<dt><a href="#clamp">clamp(num, min, max)</a> ⇒ <code>number</code></dt>
+<dd><p>Clamps a number between a minimum and maximum value.</p>
+</dd>
+<dt><a href="#formatCurrency">formatCurrency(amount, [currency], [locale])</a> ⇒ <code>string</code></dt>
+<dd><p>Formats a number as a currency string.</p>
+</dd>
+<dt><a href="#isValidEmail">isValidEmail(email)</a> ⇒ <code>boolean</code></dt>
+<dd><p>Checks if a string is a valid email address.
+Uses a simple regex for basic validation.</p>
+</dd>
+<dt><a href="#isValidUrl">isValidUrl(url)</a> ⇒ <code>boolean</code></dt>
+<dd><p>Checks if a string is a valid URL.</p>
+</dd>
+<dt><a href="#sum">sum(arr)</a> ⇒ <code>number</code></dt>
+<dd><p>Calculates the sum of an array of numbers.</p>
+</dd>
+<dt><a href="#max">max(arr)</a> ⇒ <code>number</code></dt>
+<dd><p>Finds the maximum number in an array.</p>
+</dd>
+<dt><a href="#min">min(arr)</a> ⇒ <code>number</code></dt>
+<dd><p>Finds the minimum number in an array.</p>
+</dd>
+<dt><a href="#groupBy">groupBy(arr, fn)</a> ⇒ <code>object</code></dt>
+<dd><p>Groups items of an array based on a key returned by a callback function.</p>
+</dd>
 </dl>
 
 ## Typedefs
@@ -96,10 +131,6 @@ NOTE: In the case of trying to open this url in a new tab, the browser might fir
 | url | <code>string</code> |  | The url that you want to open on the client's browser. |
 | [newTab] | <code>boolean</code> | <code>false</code> | Flag whether to open this url in a new tab. Please note that passing this true might get the new link (popup) blocked depending on the browser settings. |
 
-**Example**  
-```js
-openLink("https://github.com/harshankur");
-```
 **Example**  
 ```js
 openLink("https://github.com/harshankur", true);
@@ -295,6 +326,201 @@ Debounces a function, i.e., ignored repeated calls for a function. It rather tak
 | fn | <code>function</code> | Function needed to debounce |
 | t | <code>number</code> | milliseconds delay for debouncing. |
 
+<a name="capitalize"></a>
+
+## capitalize(str) ⇒ <code>string</code>
+Capitalizes the first letter of a string.
+
+**Kind**: global function  
+**Returns**: <code>string</code> - The string with its first character converted to uppercase.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| str | <code>string</code> | The string to capitalize. |
+
+**Example**  
+```js
+capitalize("hello world") 
+// "Hello world"
+```
+<a name="truncate"></a>
+
+## truncate(str, length) ⇒ <code>string</code>
+Truncates a string to a specified length and adds an ellipsis (...) if it exceeds that length.
+
+**Kind**: global function  
+**Returns**: <code>string</code> - The truncated string with '...' appended if truncated.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| str | <code>string</code> | The string to truncate. |
+| length | <code>number</code> | The maximum length of the string before truncation. |
+
+**Example**  
+```js
+truncate("Hello World", 5) 
+// "Hello..."
+```
+<a name="slugify"></a>
+
+## slugify(str) ⇒ <code>string</code>
+Converts a string into a URL-friendly slug.
+Converts to lowercase, removes non-word characters, and replaces spaces with dashes.
+
+**Kind**: global function  
+**Returns**: <code>string</code> - The clean, slugified string.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| str | <code>string</code> | The string to slugify. |
+
+**Example**  
+```js
+slugify("Hello World!") 
+// "hello-world"
+```
+<a name="clamp"></a>
+
+## clamp(num, min, max) ⇒ <code>number</code>
+Clamps a number between a minimum and maximum value.
+
+**Kind**: global function  
+**Returns**: <code>number</code> - The clamped value.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| num | <code>number</code> | The number to clamp. |
+| min | <code>number</code> | The minimum allowed value. |
+| max | <code>number</code> | The maximum allowed value. |
+
+**Example**  
+```js
+clamp(100, 0, 50) 
+// 50
+```
+<a name="formatCurrency"></a>
+
+## formatCurrency(amount, [currency], [locale]) ⇒ <code>string</code>
+Formats a number as a currency string.
+
+**Kind**: global function  
+**Returns**: <code>string</code> - The formatted currency string.  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| amount | <code>number</code> |  | The number to format. |
+| [currency] | <code>string</code> | <code>&quot;&#x27;USD&#x27;&quot;</code> | The currency code (e.g., 'USD', 'EUR'). |
+| [locale] | <code>string</code> | <code>&quot;&#x27;en-US&#x27;&quot;</code> | The locale string (e.g., 'en-US', 'de-DE'). |
+
+**Example**  
+```js
+formatCurrency(1234.56) 
+// "$1,234.56"
+```
+<a name="isValidEmail"></a>
+
+## isValidEmail(email) ⇒ <code>boolean</code>
+Checks if a string is a valid email address.
+Uses a simple regex for basic validation.
+
+**Kind**: global function  
+**Returns**: <code>boolean</code> - True if valid, false otherwise.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| email | <code>string</code> | The email string to check. |
+
+**Example**  
+```js
+isValidEmail("test@example.com") 
+// true
+```
+<a name="isValidUrl"></a>
+
+## isValidUrl(url) ⇒ <code>boolean</code>
+Checks if a string is a valid URL.
+
+**Kind**: global function  
+**Returns**: <code>boolean</code> - True if valid, false otherwise.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| url | <code>string</code> | The URL string to check. |
+
+**Example**  
+```js
+isValidUrl("https://google.com") 
+// true
+```
+<a name="sum"></a>
+
+## sum(arr) ⇒ <code>number</code>
+Calculates the sum of an array of numbers.
+
+**Kind**: global function  
+**Returns**: <code>number</code> - The total sum.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| arr | <code>Array.&lt;number&gt;</code> | The array of numbers to sum. |
+
+**Example**  
+```js
+sum([1, 2, 3]) 
+// 6
+```
+<a name="max"></a>
+
+## max(arr) ⇒ <code>number</code>
+Finds the maximum number in an array.
+
+**Kind**: global function  
+**Returns**: <code>number</code> - The maximum value.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| arr | <code>Array.&lt;number&gt;</code> | The array to search. |
+
+**Example**  
+```js
+max([1, 5, 2]) 
+// 5
+```
+<a name="min"></a>
+
+## min(arr) ⇒ <code>number</code>
+Finds the minimum number in an array.
+
+**Kind**: global function  
+**Returns**: <code>number</code> - The minimum value.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| arr | <code>Array.&lt;number&gt;</code> | The array to search. |
+
+**Example**  
+```js
+min([1, 5, 2]) 
+// 1
+```
+<a name="groupBy"></a>
+
+## groupBy(arr, fn) ⇒ <code>object</code>
+Groups items of an array based on a key returned by a callback function.
+
+**Kind**: global function  
+**Returns**: <code>object</code> - An object where keys are the groups and values are arrays of items.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| arr | <code>Array</code> | The array to group. |
+| fn | <code>function</code> | The callback function that returns the key to group by. |
+
+**Example**  
+```js
+groupBy([1.1, 1.2, 2.1], Math.floor) 
+// { '1': [1.1, 1.2], '2': [2.1] }
+```
 <a name="FetchConfig"></a>
 
 ## FetchConfig : <code>Object</code>
