@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 -   Refactored `vanillaUtils.js` to use UMD pattern.
--   Updated build process to use `minify` via npm scripts.
+-   Updated build process to use `terser` for safe UMD minification.
 -   Improved documentation generation pipeline.
 
 ### Removed
