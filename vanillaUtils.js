@@ -116,17 +116,37 @@
          * @type {Object.<string, string>}
          */
         const signatures = {
+            // Images
             "89504E47": "image/png",
             "47494638": "image/gif",
             "FFD8FF": "image/jpeg",
+            "49492A00": "image/tiff",
+            "4D4D002A": "image/tiff",
+            "424D": "image/bmp",
+            "52494646": "image/webp",
+            // Documents
             "25504446": "application/pdf",
             "504B0304": "application/zip",
             "504B34": "application/vnd.openxmlformats-officedocument",
-            "49492A00": "image/tiff",
-            "4D4D002A": "image/tiff",
+            "D0CF11E0": "application/msword", // DOC, XLS, PPT
+            // Archives
             "377ABCAF271C": "application/7z",
             "1F8B08": "application/gzip",
-            "424D": "image/bmp"
+            "526172211A07": "application/x-rar-compressed",
+            "7573746172": "application/x-tar",
+            // Video
+            "000000": "video/mp4", // Partial match, needs more specific check
+            "1A45DFA3": "video/webm",
+            "52494646": "video/avi", // Note: Conflicts with WEBP, needs context
+            "6674797069736F6D": "video/mp4",
+            // Audio
+            "494433": "audio/mpeg", // MP3
+            "FFFB": "audio/mpeg", // MP3
+            "FFF3": "audio/mpeg", // MP3
+            "FFF2": "audio/mpeg", // MP3
+            "52494646": "audio/wav", // Note: Conflicts with WEBP/AVI
+            "664C6143": "audio/flac",
+            "4F676753": "audio/ogg"
         };
 
         /**
@@ -185,6 +205,11 @@
      *            | 'GET'
      *            | 'POST'
      *            | 'PUT'}                             [method]         Method of the fetch call. Default is **'GET'**.
+     * @property {'json'
+     *            | 'text'
+     *            | 'blob'
+     *            | 'arrayBuffer'
+     *            | 'auto'}                            [responseType]   Expected response type. Default is **'auto'** which auto-detects based on Content-Type header.
      * @property {'no-cors'
      *            | 'cors'
      *            | 'navigate'
@@ -243,6 +268,7 @@
         // Local Config Object.
         const internalConfig = { ...config };
         internalConfig.method = internalConfig.method ?? 'GET';
+        const responseType = config.responseType ?? 'auto';
 
         // Execute fetch call and return promise.
         return fetch(url, internalConfig)
@@ -250,7 +276,29 @@
                 if (!response.ok) {
                     throw response;
                 }
-                return response.json();
+
+                // Handle response based on type
+                if (responseType === 'auto') {
+                    // Auto-detect based on Content-Type header
+                    const contentType = response.headers.get('content-type') || '';
+                    if (contentType.includes('application/json')) {
+                        return response.json();
+                    } else if (contentType.includes('text/')) {
+                        return response.text();
+                    } else if (contentType.includes('image/') || contentType.includes('application/octet-stream')) {
+                        return response.blob();
+                    } else {
+                        return response.text();
+                    }
+                } else if (responseType === 'json') {
+                    return response.json();
+                } else if (responseType === 'text') {
+                    return response.text();
+                } else if (responseType === 'blob') {
+                    return response.blob();
+                } else if (responseType === 'arrayBuffer') {
+                    return response.arrayBuffer();
+                }
             });
     }
 
@@ -370,18 +418,74 @@
 
     /**
      * Debounces a function, i.e., ignored repeated calls for a function. It rather takes the last call while it is waiting.
-     * @param {function}  fn Function needed to debounce
-     * @param {number}    t  milliseconds delay for debouncing.
+     * @param {function}  fn      Function needed to debounce
+     * @param {number}    t       milliseconds delay for debouncing.
+     * @param {Object}    [options={}] Configuration options.
+     * @param {boolean}   [options.immediate=false] If true, trigger the function on the leading edge instead of the trailing edge.
      * @return {function}
      * @global
      */
-    function debounce(fn, t) {
+    function debounce(fn, t, options = {}) {
         let scheduled = undefined;
         return function (...args) {
+            const callNow = options.immediate && !scheduled;
             if (scheduled)
                 clearTimeout(scheduled);
-            scheduled = setTimeout(() => fn(...args), t);
+            scheduled = setTimeout(() => {
+                scheduled = undefined;
+                if (!options.immediate)
+                    fn(...args);
+            }, t);
+            if (callNow)
+                fn(...args);
         }
+    }
+
+
+    /**
+     * Throttles a function, ensuring it is called at most once per specified time period.
+     * Unlike debounce, throttle guarantees the function will execute at regular intervals during repeated calls.
+     * @param {function}  fn      Function needed to throttle
+     * @param {number}    delay   milliseconds delay for throttling.
+     * @param {Object}    [options={}] Configuration options.
+     * @param {boolean}   [options.leading=true] If true, trigger the function on the leading edge.
+     * @param {boolean}   [options.trailing=true] If true, trigger the function on the trailing edge.
+     * @return {function}
+     * 
+     * @example
+     * const throttled = throttle(() => console.log('scroll'), 100);
+     * window.addEventListener('scroll', throttled);
+     * @global
+     */
+    function throttle(fn, delay, options = {}) {
+        let lastCall = 0;
+        let scheduled = undefined;
+        const leading = options.leading !== false;
+        const trailing = options.trailing !== false;
+
+        return function (...args) {
+            const now = Date.now();
+            const timeSinceLastCall = now - lastCall;
+
+            if (!lastCall && !leading) {
+                lastCall = now;
+            }
+
+            if (timeSinceLastCall >= delay) {
+                if (scheduled) {
+                    clearTimeout(scheduled);
+                    scheduled = undefined;
+                }
+                lastCall = now;
+                fn(...args);
+            } else if (!scheduled && trailing) {
+                scheduled = setTimeout(() => {
+                    lastCall = leading ? Date.now() : 0;
+                    scheduled = undefined;
+                    fn(...args);
+                }, delay - timeSinceLastCall);
+            }
+        };
     }
 
 
@@ -437,6 +541,163 @@
             .replace(/\-\-+/g, '-');  // Replace multiple - with single -
     }
 
+    /**
+     * Converts a string to camelCase.
+     * @param   {string} str The string to convert.
+     * @returns {string}     The camelCase string.
+     * 
+     * @example camelCase("hello world") 
+     * // "helloWorld"
+     * @example camelCase("hello-world") 
+     * // "helloWorld"
+     * @example camelCase("hello_world") 
+     * // "helloWorld"
+     * @global
+     */
+    function camelCase(str) {
+        if (!str) return '';
+        return str.toString().toLowerCase()
+            .trim()
+            .replace(/[\s_-]+(.)?/g, (_, char) => char ? char.toUpperCase() : '');
+    }
+
+    /**
+     * Converts a string to snake_case.
+     * @param   {string} str The string to convert.
+     * @returns {string}     The snake_case string.
+     * 
+     * @example snakeCase("helloWorld") 
+     * // "hello_world"
+     * @example snakeCase("Hello World") 
+     * // "hello_world"
+     * @global
+     */
+    function snakeCase(str) {
+        if (!str) return '';
+        return str.toString()
+            .trim()
+            .replace(/([A-Z])/g, '_$1')
+            .replace(/[\s-]+/g, '_')
+            .replace(/^_+/, '')
+            .replace(/_+/g, '_')
+            .toLowerCase();
+    }
+
+    /**
+     * Converts a string to kebab-case.
+     * @param   {string} str The string to convert.
+     * @returns {string}     The kebab-case string.
+     * 
+     * @example kebabCase("helloWorld") 
+     * // "hello-world"
+     * @example kebabCase("Hello World") 
+     * // "hello-world"
+     * @global
+     */
+    function kebabCase(str) {
+        if (!str) return '';
+        return str.toString()
+            .trim()
+            .replace(/([A-Z])/g, '-$1')
+            .replace(/[\s_]+/g, '-')
+            .replace(/^-+/, '')
+            .replace(/-+/g, '-')
+            .toLowerCase();
+    }
+
+    /**
+     * Escapes HTML special characters to prevent XSS attacks.
+     * @param   {string} str The string to escape.
+     * @returns {string}     The escaped string with HTML entities.
+     * 
+     * @example escapeHtml("<script>alert('xss')</script>") 
+     * // "&lt;script&gt;alert('xss')&lt;/script&gt;"
+     * @global
+     */
+    function escapeHtml(str) {
+        if (!str) return '';
+        const htmlEscapeMap = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#x27;',
+            '/': '&#x2F;'
+        };
+        return str.toString().replace(/[&<>"'\/]/g, char => htmlEscapeMap[char]);
+    }
+
+    /**
+     * Unescapes HTML entities back to their original characters.
+     * @param   {string} str The string with HTML entities to unescape.
+     * @returns {string}     The unescaped string.
+     * 
+     * @example unescapeHtml("&lt;script&gt;alert('xss')&lt;/script&gt;") 
+     * // "<script>alert('xss')</script>"
+     * @global
+     */
+    function unescapeHtml(str) {
+        if (!str) return '';
+        const htmlUnescapeMap = {
+            '&amp;': '&',
+            '&lt;': '<',
+            '&gt;': '>',
+            '&quot;': '"',
+            '&#x27;': "'",
+            '&#x2F;': '/'
+        };
+        return str.toString().replace(/&(?:amp|lt|gt|quot|#x27|#x2F);/g, entity => htmlUnescapeMap[entity]);
+    }
+
+    /**
+     * Removes all HTML tags from a string, leaving only the text content.
+     * @param   {string} str The string containing HTML tags.
+     * @returns {string}     The string with all HTML tags removed.
+     * 
+     * @example stripHtml("<p>Hello <strong>World</strong></p>") 
+     * // "Hello World"
+     * @global
+     */
+    function stripHtml(str) {
+        if (!str) return '';
+        return str.toString().replace(/<[^>]*>/g, '');
+    }
+
+    /**
+     * Pads a string to a specified length with a given character.
+     * @param   {string} str       The string to pad.
+     * @param   {number} length    The target length of the padded string.
+     * @param   {string} [char=' '] The character to use for padding. Default is space.
+     * @param   {string} [direction='right'] The direction to pad ('left', 'right', or 'both').
+     * @returns {string}           The padded string.
+     * 
+     * @example pad("5", 3, "0", "left") 
+     * // "005"
+     * @example pad("hello", 10, "*", "right") 
+     * // "hello*****"
+     * @example pad("hi", 6, "-", "both") 
+     * // "--hi--"
+     * @global
+     */
+    function pad(str, length, char = ' ', direction = 'right') {
+        if (!str) str = '';
+        str = str.toString();
+        if (str.length >= length) return str;
+
+        const padLength = length - str.length;
+        const padChar = char.toString().charAt(0);
+
+        if (direction === 'left') {
+            return padChar.repeat(padLength) + str;
+        } else if (direction === 'both') {
+            const leftPad = Math.floor(padLength / 2);
+            const rightPad = padLength - leftPad;
+            return padChar.repeat(leftPad) + str + padChar.repeat(rightPad);
+        } else {
+            return str + padChar.repeat(padLength);
+        }
+    }
+
     // #endregion
 
     // #region Numbers & Validation
@@ -469,6 +730,55 @@
      */
     function formatCurrency(amount, currency = 'USD', locale = 'en-US') {
         return new Intl.NumberFormat(locale, { style: 'currency', currency: currency }).format(amount);
+    }
+
+    /**
+     * Generates a random integer between min and max (inclusive).
+     * @param   {number} min The minimum value (inclusive).
+     * @param   {number} max The maximum value (inclusive).
+     * @returns {number}     A random integer between min and max.
+     * 
+     * @example randomInt(1, 10) 
+     * // 7 (random number between 1 and 10)
+     * @global
+     */
+    function randomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    /**
+     * Rounds a number to a specified number of decimal places.
+     * @param   {number} num      The number to round.
+     * @param   {number} decimals The number of decimal places.
+     * @returns {number}          The rounded number.
+     * 
+     * @example round(3.14159, 2) 
+     * // 3.14
+     * @example round(2.5, 0) 
+     * // 3
+     * @global
+     */
+    function round(num, decimals) {
+        const factor = Math.pow(10, decimals);
+        return Math.round(num * factor) / factor;
+    }
+
+    /**
+     * Formats a number with locale-specific thousands separators and decimal points.
+     * @param   {number} num          The number to format.
+     * @param   {string} [locale='en-US'] The locale string (e.g., 'en-US', 'de-DE').
+     * @returns {string}              The formatted number string.
+     * 
+     * @example formatNumber(1234567.89) 
+     * // "1,234,567.89"
+     * @example formatNumber(1234567.89, 'de-DE') 
+     * // "1.234.567,89"
+     * @global
+     */
+    function formatNumber(num, locale = 'en-US') {
+        return new Intl.NumberFormat(locale).format(num);
     }
 
     /**
@@ -570,6 +880,484 @@
         return res;
     }
 
+    /**
+     * Removes duplicate values from an array.
+     * @param   {Array} arr The array to process.
+     * @returns {Array}     A new array with duplicate values removed.
+     * 
+     * @example unique([1, 2, 2, 3, 1]) 
+     * // [1, 2, 3]
+     * @global
+     */
+    function unique(arr) {
+        return [...new Set(arr)];
+    }
+
+    /**
+     * Removes duplicate values from an array based on a key function.
+     * @param   {Array}    arr The array to process.
+     * @param   {function} fn  The function that returns the key to compare for uniqueness.
+     * @returns {Array}        A new array with duplicates removed based on the key function.
+     * 
+     * @example uniqueBy([{id: 1}, {id: 1}, {id: 2}], x => x.id) 
+     * // [{id: 1}, {id: 2}]
+     * @global
+     */
+    function uniqueBy(arr, fn) {
+        const seen = new Set();
+        return arr.filter(item => {
+            const key = fn(item);
+            if (seen.has(key)) {
+                return false;
+            }
+            seen.add(key);
+            return true;
+        });
+    }
+
+    /**
+     * Splits an array into chunks of a specified size.
+     * @param   {Array}  arr  The array to split.
+     * @param   {number} size The size of each chunk.
+     * @returns {Array}       An array of chunks.
+     * 
+     * @example chunk([1, 2, 3, 4, 5], 2) 
+     * // [[1, 2], [3, 4], [5]]
+     * @global
+     */
+    function chunk(arr, size) {
+        const result = [];
+        for (let i = 0; i < arr.length; i += size) {
+            result.push(arr.slice(i, i + size));
+        }
+        return result;
+    }
+
+    /**
+     * Flattens a nested array to a specified depth.
+     * @param   {Array}  arr   The array to flatten.
+     * @param   {number} depth The depth to flatten to. Default is 1.
+     * @returns {Array}        The flattened array.
+     * 
+     * @example flatten([[1, 2], [3, [4]]], 1) 
+     * // [1, 2, 3, [4]]
+     * @example flatten([[1, 2], [3, [4]]], 2) 
+     * // [1, 2, 3, 4]
+     * @global
+     */
+    function flatten(arr, depth = 1) {
+        if (depth === 0) return arr.slice();
+        return arr.reduce((acc, val) => {
+            return acc.concat(Array.isArray(val) ? flatten(val, depth - 1) : val);
+        }, []);
+    }
+
+    /**
+     * Recursively flattens a nested array to a single level.
+     * @param   {Array} arr The array to flatten.
+     * @returns {Array}     The completely flattened array.
+     * 
+     * @example flattenDeep([[1, [2, [3, [4]]]]) 
+     * // [1, 2, 3, 4]
+     * @global
+     */
+    function flattenDeep(arr) {
+        return arr.reduce((acc, val) => {
+            return acc.concat(Array.isArray(val) ? flattenDeep(val) : val);
+        }, []);
+    }
+
+    /**
+     * Randomly shuffles an array using the Fisher-Yates algorithm.
+     * @param   {Array} arr The array to shuffle.
+     * @returns {Array}     A new shuffled array.
+     * 
+     * @example shuffle([1, 2, 3, 4, 5]) 
+     * // [3, 1, 5, 2, 4] (random order)
+     * @global
+     */
+    function shuffle(arr) {
+        const result = arr.slice();
+        for (let i = result.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [result[i], result[j]] = [result[j], result[i]];
+        }
+        return result;
+    }
+
+    /**
+     * Splits an array into two groups based on a predicate function.
+     * @param   {Array}    arr The array to partition.
+     * @param   {function} fn  The predicate function that returns true or false.
+     * @returns {Array}        An array containing two arrays: [truthyValues, falsyValues].
+     * 
+     * @example partition([1, 2, 3, 4], x => x % 2 === 0) 
+     * // [[2, 4], [1, 3]]
+     * @global
+     */
+    function partition(arr, fn) {
+        const truthy = [];
+        const falsy = [];
+        arr.forEach(item => {
+            if (fn(item)) {
+                truthy.push(item);
+            } else {
+                falsy.push(item);
+            }
+        });
+        return [truthy, falsy];
+    }
+
+    // #endregion
+
+    // #region Object Utilities
+
+    /**
+     * Creates a deep clone of an object or array.
+     * @param   {*} obj The object to clone.
+     * @returns {*}     A deep copy of the object.
+     * 
+     * @example deepClone({a: {b: 1}}) 
+     * // {a: {b: 1}} (new object)
+     * @global
+     */
+    function deepClone(obj) {
+        if (obj === null || typeof obj !== 'object') return obj;
+        if (obj instanceof Date) return new Date(obj.getTime());
+        if (obj instanceof Array) return obj.map(item => deepClone(item));
+        if (obj instanceof Object) {
+            const clonedObj = {};
+            for (const key in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                    clonedObj[key] = deepClone(obj[key]);
+                }
+            }
+            return clonedObj;
+        }
+    }
+
+    /**
+     * Creates a new object with only the specified keys from the source object.
+     * @param   {Object}   obj  The source object.
+     * @param   {string[]} keys Array of keys to pick from the object.
+     * @returns {Object}        A new object with only the specified keys.
+     * 
+     * @example pick({a: 1, b: 2, c: 3}, ['a', 'c']) 
+     * // {a: 1, c: 3}
+     * @global
+     */
+    function pick(obj, keys) {
+        const result = {};
+        keys.forEach(key => {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                result[key] = obj[key];
+            }
+        });
+        return result;
+    }
+
+    /**
+     * Creates a new object without the specified keys from the source object.
+     * @param   {Object}   obj  The source object.
+     * @param   {string[]} keys Array of keys to omit from the object.
+     * @returns {Object}        A new object without the specified keys.
+     * 
+     * @example omit({a: 1, b: 2, c: 3}, ['b']) 
+     * // {a: 1, c: 3}
+     * @global
+     */
+    function omit(obj, keys) {
+        const result = { ...obj };
+        keys.forEach(key => {
+            delete result[key];
+        });
+        return result;
+    }
+
+    /**
+     * Deep merges multiple objects into a target object.
+     * @param   {Object}    target  The target object to merge into.
+     * @param   {...Object} sources The source objects to merge from.
+     * @returns {Object}            The merged object.
+     * 
+     * @example deepMerge({a: {b: 1}}, {a: {c: 2}}) 
+     * // {a: {b: 1, c: 2}}
+     * @global
+     */
+    function deepMerge(target, ...sources) {
+        if (!sources.length) return target;
+        const source = sources.shift();
+
+        if (typeof target === 'object' && typeof source === 'object') {
+            for (const key in source) {
+                if (Object.prototype.hasOwnProperty.call(source, key)) {
+                    if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])) {
+                        if (!target[key]) target[key] = {};
+                        deepMerge(target[key], source[key]);
+                    } else {
+                        target[key] = source[key];
+                    }
+                }
+            }
+        }
+
+        return deepMerge(target, ...sources);
+    }
+
+    /**
+     * Checks if a value is empty (works for objects, arrays, strings, null, undefined).
+     * @param   {*}       value The value to check.
+     * @returns {boolean}       True if the value is empty, false otherwise.
+     * 
+     * @example isEmpty({}) 
+     * // true
+     * @example isEmpty([]) 
+     * // true
+     * @example isEmpty("") 
+     * // true
+     * @example isEmpty({a: 1}) 
+     * // false
+     * @global
+     */
+    function isEmpty(value) {
+        if (value == null) return true;
+        if (typeof value === 'string' || Array.isArray(value)) return value.length === 0;
+        if (typeof value === 'object') return Object.keys(value).length === 0;
+        return false;
+    }
+
+    // #endregion
+
+    // #region Async Utilities (Additional)
+
+    /**
+     * Returns a promise that resolves after a specified number of milliseconds.
+     * Useful for adding delays in async functions.
+     * @param   {number} ms The number of milliseconds to sleep.
+     * @returns {Promise<void>} A promise that resolves after the specified delay.
+     * 
+     * @example await sleep(1000); // Wait 1 second
+     * @global
+     */
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    /**
+     * Retries an async function a specified number of times with a delay between attempts.
+     * @param   {function} fn      The async function to retry.
+     * @param   {Object}   [options={}] Configuration options.
+     * @param   {number}   [options.attempts=3] The maximum number of attempts.
+     * @param   {number}   [options.delay=1000] The delay in milliseconds between attempts.
+     * @returns {Promise<any>}     The result of the function if successful.
+     * 
+     * @example await retry(() => fetch('/api'), { attempts: 3, delay: 1000 });
+     * @global
+     */
+    async function retry(fn, options = {}) {
+        const attempts = options.attempts ?? 3;
+        const delay = options.delay ?? 1000;
+
+        for (let i = 0; i < attempts; i++) {
+            try {
+                return await fn();
+            } catch (error) {
+                if (i === attempts - 1) throw error;
+                await sleep(delay);
+            }
+        }
+    }
+
+    /**
+     * Wraps a promise with a timeout, rejecting if the promise doesn't resolve within the specified time.
+     * @param   {Promise} promise The promise to wrap.
+     * @param   {number}  ms      The timeout in milliseconds.
+     * @returns {Promise<any>}    The result of the promise if it resolves in time.
+     * 
+     * @example await timeout(fetch('/api'), 5000); // Timeout after 5 seconds
+     * @global
+     */
+    function timeout(promise, ms) {
+        return Promise.race([
+            promise,
+            new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Promise timed out')), ms)
+            )
+        ]);
+    }
+
+    // #endregion
+
+    // #region DOM Utilities (Additional)
+
+    /**
+     * Executes a function when the DOM is fully loaded.
+     * @param   {function} fn The function to execute when the DOM is ready.
+     * @returns {void}
+     * 
+     * @example ready(() => console.log('DOM ready'));
+     * @global
+     */
+    function ready(fn) {
+        if (document.readyState !== 'loading') {
+            fn();
+        } else {
+            document.addEventListener('DOMContentLoaded', fn);
+        }
+    }
+
+    /**
+     * Parses URL query parameters into an object.
+     * @param   {string} [url=window.location.search] The URL or query string to parse. Defaults to current page query string.
+     * @returns {Object}                              An object containing the query parameters.
+     * 
+     * @example getQueryParams('?foo=bar&baz=qux') 
+     * // {foo: 'bar', baz: 'qux'}
+     * @global
+     */
+    function getQueryParams(url) {
+        const queryString = url ?? (typeof window !== 'undefined' ? window.location.search : '');
+        const params = {};
+        const searchParams = new URLSearchParams(queryString);
+        for (const [key, value] of searchParams) {
+            params[key] = value;
+        }
+        return params;
+    }
+
+    /**
+     * Builds a query string from an object of parameters.
+     * @param   {Object} params The object containing query parameters.
+     * @returns {string}        The query string (without leading '?').
+     * 
+     * @example buildQueryString({foo: 'bar', baz: 'qux'}) 
+     * // "foo=bar&baz=qux"
+     * @global
+     */
+    function buildQueryString(params) {
+        const searchParams = new URLSearchParams();
+        for (const key in params) {
+            if (Object.prototype.hasOwnProperty.call(params, key)) {
+                searchParams.append(key, params[key]);
+            }
+        }
+        return searchParams.toString();
+    }
+
+    // #endregion
+
+    // #region Storage Utilities
+
+    /**
+     * Sets a value in localStorage with automatic JSON serialization.
+     * @param   {string} key   The key to store the value under.
+     * @param   {*}      value The value to store (will be JSON stringified).
+     * @returns {void}
+     * 
+     * @example setLocalStorage('user', {name: 'John'});
+     * @global
+     */
+    function setLocalStorage(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+        } catch (error) {
+            console.error('Error setting localStorage:', error);
+        }
+    }
+
+    /**
+     * Gets a value from localStorage with automatic JSON parsing.
+     * @param   {string} key      The key to retrieve.
+     * @param   {*}      [fallback=null] The fallback value if the key doesn't exist or parsing fails.
+     * @returns {*}               The parsed value from localStorage, or the fallback.
+     * 
+     * @example getLocalStorage('user') 
+     * // {name: 'John'}
+     * @global
+     */
+    function getLocalStorage(key, fallback = null) {
+        try {
+            const item = localStorage.getItem(key);
+            return item ? JSON.parse(item) : fallback;
+        } catch (error) {
+            console.error('Error getting localStorage:', error);
+            return fallback;
+        }
+    }
+
+    /**
+     * Removes a value from localStorage.
+     * @param   {string} key The key to remove.
+     * @returns {void}
+     * 
+     * @example removeLocalStorage('user');
+     * @global
+     */
+    function removeLocalStorage(key) {
+        try {
+            localStorage.removeItem(key);
+        } catch (error) {
+            console.error('Error removing localStorage:', error);
+        }
+    }
+
+    /**
+     * Sets a value in sessionStorage with automatic JSON serialization.
+     * @param   {string} key   The key to store the value under.
+     * @param   {*}      value The value to store (will be JSON stringified).
+     * @returns {void}
+     * 
+     * @example setSessionStorage('temp', {data: 'value'});
+     * @global
+     */
+    function setSessionStorage(key, value) {
+        try {
+            sessionStorage.setItem(key, JSON.stringify(value));
+        } catch (error) {
+            console.error('Error setting sessionStorage:', error);
+        }
+    }
+
+    /**
+     * Gets a value from sessionStorage with automatic JSON parsing.
+     * @param   {string} key      The key to retrieve.
+     * @param   {*}      [fallback=null] The fallback value if the key doesn't exist or parsing fails.
+     * @returns {*}               The parsed value from sessionStorage, or the fallback.
+     * 
+     * @example getSessionStorage('temp') 
+     * // {data: 'value'}
+     * @global
+     */
+    function getSessionStorage(key, fallback = null) {
+        try {
+            const item = sessionStorage.getItem(key);
+            return item ? JSON.parse(item) : fallback;
+        } catch (error) {
+            console.error('Error getting sessionStorage:', error);
+            return fallback;
+        }
+    }
+
+    /**
+     * Removes a value from sessionStorage.
+     * @param   {string} key The key to remove.
+     * @returns {void}
+     * 
+     * @example removeSessionStorage('temp');
+     * @global
+     */
+    function removeSessionStorage(key) {
+        try {
+            sessionStorage.removeItem(key);
+        } catch (error) {
+            console.error('Error removing sessionStorage:', error);
+        }
+    }
+
+    // #endregion
+
+    // #region Array Helpers (Standalone + Prototype)
+
     // Polyfills / Extensions
 
     /**
@@ -608,32 +1396,73 @@
 
     // Public API
     return {
+        // DOM Manipulation
         createElement,
         openLink,
         downloadLink,
+        ready,
+        getQueryParams,
+        buildQueryString,
+        // File & MIME
         guessMimeType,
         downloadFileFromBytes,
+        // API
         fetchRequest,
+        // Cookies
         setCookie,
         getCookie,
         removeCookie,
+        // Async
         toPromise,
         debounce,
+        throttle,
+        sleep,
+        retry,
+        timeout,
         // Strings
         capitalize,
         truncate,
         slugify,
+        camelCase,
+        snakeCase,
+        kebabCase,
+        escapeHtml,
+        unescapeHtml,
+        stripHtml,
+        pad,
         // Numbers
         clamp,
         formatCurrency,
+        randomInt,
+        round,
+        formatNumber,
         // Validation
         isValidEmail,
         isValidUrl,
-
         // Array Helpers
         sum,
         max,
         min,
-        groupBy
+        groupBy,
+        unique,
+        uniqueBy,
+        chunk,
+        flatten,
+        flattenDeep,
+        shuffle,
+        partition,
+        // Object Utilities
+        deepClone,
+        pick,
+        omit,
+        deepMerge,
+        isEmpty,
+        // Storage
+        setLocalStorage,
+        getLocalStorage,
+        removeLocalStorage,
+        setSessionStorage,
+        getSessionStorage,
+        removeSessionStorage
     };
 }));

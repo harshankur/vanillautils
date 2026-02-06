@@ -1,16 +1,18 @@
 {
     "name": "vanillautils",
-    "version": "1.0.0",
-    "description": "A zero-dependency collection of utility functions that can be imported as a module or be added to any website using a minified js file which simplifies developing websites.",
+    "version": "2.0.0",
+    "description": "A zero-dependency collection of 60+ utility functions that can be imported as a module or be added to any website using a minified js file which simplifies developing websites.",
     "main": "vanillaUtils.js",
     "files": [
         "vanillaUtils.js",
+        "vanillaUtils.min.js",
+        "vanillaUtils.min.js.map",
         "typings/vanillaUtils.d.ts"
     ],
     "types": "typings/vanillaUtils.d.ts",
     "scripts": {
         "test": "jest",
-        "build": "terser vanillaUtils.js --compress --mangle --output vanillaUtils.min.js",
+        "build": "terser vanillaUtils.js --compress --mangle --source-map --output vanillaUtils.min.js",
         "minify": "npm run build"
     },
     "repository": {
@@ -19,9 +21,20 @@
     },
     "keywords": [
         "utils",
+        "utilities",
+        "helpers",
+        "vanilla",
+        "javascript",
         "cookies",
         "api",
-        "vanilla"
+        "fetch",
+        "dom",
+        "strings",
+        "arrays",
+        "objects",
+        "async",
+        "storage",
+        "validation"
     ],
     "author": "Harsh Ankur",
     "license": "MIT",
